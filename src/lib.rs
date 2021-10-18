@@ -1,7 +1,11 @@
+pub mod geometry;
+
 #[cfg(test)]
 mod tests {
+    use crate::geometry::mesh::*;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn test_obj_loader() {
+
     }
 }
