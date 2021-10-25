@@ -7,7 +7,8 @@ use crate::{Float, Point3, UnitVec3, Int, Uint};
 /// `PolygonMesh` describes the input geometries pre-discretization for simulations.
 pub struct PolygonMesh {
     vertices: Vec<Point3>,
-    faces: Vec<Vec<usize>>, // A vector of a vector of indices representing a set of vertices.
+    faces: Vec<Vec<usize>>,
+    // A vector of a vector of indices representing a set of vertices.
     face_normals: Vec<UnitVec3>, // A vector of UnitVector3s
 }
 
@@ -16,7 +17,7 @@ pub struct PolygonMesh {
 pub enum MeshError {
     IOError(&'static str),
     FormatError(&'static str),
-    IndexingError(&'static str)
+    IndexingError(&'static str),
 }
 
 /**
@@ -32,7 +33,7 @@ Parameters:
 Returns:
 - `Result<UnitVec3, MeshError>` - Returns `Ok(UnitVec3)` if the method succeeds, else
 `MeshError::IndexingError` if the method cannot retrieve the necessary vertices.
-*/
+ */
 pub fn get_face_normal(polymesh: &PolygonMesh, face: &[usize]) -> Result<UnitVec3, MeshError> {
     let point_origin = match polymesh.vertices.get(face[0]) {
         None => return Err(MeshError::IndexingError("Could not load vertex.")),
@@ -67,7 +68,7 @@ Parameters:
 Returns:
 - `Option<MeshReadError>` - If a failure occurred within the method. (Returns `None` if method
 succeeded)
-*/
+ */
 fn process_obj_vertices(polymesh: &mut PolygonMesh, vertex_string: &str) -> Option<MeshError> {
     let mut point_strings = vertex_string.split_ascii_whitespace();
 
@@ -155,7 +156,7 @@ impl PolygonMesh {
     Returns:
     - `Result<Box<PolygonMesh>, MeshError>` - Returns the `Box<PolygonMesh>` if the loading
     succeeded, otherwise a `MeshError` of some form, depending on the error.
-    */
+     */
     pub fn load_obj(filename: &str) -> Result<Box<PolygonMesh>, MeshError> {
         let mut polymesh = PolygonMesh {
             vertices: Vec::with_capacity(4),
@@ -187,14 +188,14 @@ impl PolygonMesh {
             if buffer_string.starts_with("v ") {
                 if let Some(error) = process_obj_vertices(
                     &mut polymesh,
-                    buffer_string.trim_start_matches("v ")
+                    buffer_string.trim_start_matches("v "),
                 ) { return Err(error); }
                 buffer_string = String::new();
                 continue;
             } else if buffer_string.starts_with("f ") {
                 if let Some(error) = process_obj_faces(
                     &mut polymesh,
-                    buffer_string.trim_start_matches("f ")
+                    buffer_string.trim_start_matches("f "),
                 ) { return Err(error); }
                 buffer_string = String::new();
                 continue;
@@ -208,8 +209,10 @@ impl PolygonMesh {
                 || buffer_string.starts_with("usemtl ")
                 || buffer_string.starts_with("mtllib ")
                 || buffer_string.starts_with("l ")
-                || buffer_string.is_empty() { buffer_string = String::new(); continue; }
-            else { return Err(MeshError::FormatError("Invalid file line.")); }
+                || buffer_string.is_empty() {
+                buffer_string = String::new();
+                continue;
+            } else { return Err(MeshError::FormatError("Invalid file line.")); }
         }
 
         Ok(Box::new(polymesh))
@@ -220,7 +223,7 @@ impl PolygonMesh {
 
     Returns:
     - `usize` - The number of the vertices.
-    */
+     */
     #[inline(always)]
     pub fn get_vertex_count(&self) -> usize { self.vertices.len() }
 
@@ -229,7 +232,7 @@ impl PolygonMesh {
 
     Returns:
     - `usize` - The number of faces (and face normals).
-    */
+     */
     #[inline(always)]
     pub fn get_face_count(&self) -> usize { self.faces.len() }
 
@@ -242,7 +245,7 @@ impl PolygonMesh {
     Returns:
     - `Result<&Point3, MeshError>` - Returns `&Point3` if the indexing succeeds, else
     `MeshError::IndexingError`.
-    */
+     */
     pub fn get_vertex(&self, idx: usize) -> Result<&Point3, MeshError> {
         self.vertices.get(idx).ok_or(MeshError::IndexingError("Indexing failed."))
     }
@@ -294,19 +297,20 @@ impl PolygonMesh {
     Returns:
     - `Result<usize, MeshError>` - Returns the index at which the face and its associated normal were
     added.
-    */
+     */
     fn add_face(
         &mut self,
         face: Vec<usize>,
-        face_normal: Option<UnitVec3>
+        face_normal: Option<UnitVec3>,
     ) -> Result<usize, MeshError> {
-        if let Some(normal) = face_normal { self.face_normals.push(normal); }
-        else { self.face_normals.push(match get_face_normal(self, &face) {
-            Ok(t) => t,
-            Err(e) => return Err(e)
-        }); }
+        if let Some(normal) = face_normal { self.face_normals.push(normal); } else {
+            self.face_normals.push(match get_face_normal(self, &face) {
+                Ok(t) => t,
+                Err(e) => return Err(e)
+            });
+        }
 
         self.faces.push(face);
-        Ok( self.faces.len() - 1 )
+        Ok(self.faces.len() - 1)
     }
 }

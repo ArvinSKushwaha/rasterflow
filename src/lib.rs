@@ -24,22 +24,22 @@ mod tests {
         assert_eq!(mesh.get_face_count(), 8);
 
         // Check vertices
-        assert_eq!(*mesh.get_vertex(0).ok().unwrap(), Point3::from([1.,0.,0.]));
-        assert_eq!(*mesh.get_vertex(1).ok().unwrap(), Point3::from([0.,-1.,0.]));
-        assert_eq!(*mesh.get_vertex(2).ok().unwrap(), Point3::from([-1.,0.,0.]));
-        assert_eq!(*mesh.get_vertex(3).ok().unwrap(), Point3::from([0.,1.,0.]));
-        assert_eq!(*mesh.get_vertex(4).ok().unwrap(), Point3::from([0.,0.,1.]));
-        assert_eq!(*mesh.get_vertex(5).ok().unwrap(), Point3::from([0.,0.,-1.]));
+        assert_eq!(*mesh.get_vertex(0).ok().unwrap(), Point3::from([1., 0., 0.]));
+        assert_eq!(*mesh.get_vertex(1).ok().unwrap(), Point3::from([0., -1., 0.]));
+        assert_eq!(*mesh.get_vertex(2).ok().unwrap(), Point3::from([-1., 0., 0.]));
+        assert_eq!(*mesh.get_vertex(3).ok().unwrap(), Point3::from([0., 1., 0.]));
+        assert_eq!(*mesh.get_vertex(4).ok().unwrap(), Point3::from([0., 0., 1.]));
+        assert_eq!(*mesh.get_vertex(5).ok().unwrap(), Point3::from([0., 0., -1.]));
 
         // Check faces
-        assert_eq!(*mesh.get_face(0).ok().unwrap(), vec![1,0,4]);
-        assert_eq!(*mesh.get_face(1).ok().unwrap(), vec![2,1,4]);
-        assert_eq!(*mesh.get_face(2).ok().unwrap(), vec![3,2,4]);
-        assert_eq!(*mesh.get_face(3).ok().unwrap(), vec![0,3,4]);
-        assert_eq!(*mesh.get_face(4).ok().unwrap(), vec![0,1,5]);
-        assert_eq!(*mesh.get_face(5).ok().unwrap(), vec![1,2,5]);
-        assert_eq!(*mesh.get_face(6).ok().unwrap(), vec![2,3,5]);
-        assert_eq!(*mesh.get_face(7).ok().unwrap(), vec![3,0,5]);
+        assert_eq!(*mesh.get_face(0).ok().unwrap(), vec![1, 0, 4]);
+        assert_eq!(*mesh.get_face(1).ok().unwrap(), vec![2, 1, 4]);
+        assert_eq!(*mesh.get_face(2).ok().unwrap(), vec![3, 2, 4]);
+        assert_eq!(*mesh.get_face(3).ok().unwrap(), vec![0, 3, 4]);
+        assert_eq!(*mesh.get_face(4).ok().unwrap(), vec![0, 1, 5]);
+        assert_eq!(*mesh.get_face(5).ok().unwrap(), vec![1, 2, 5]);
+        assert_eq!(*mesh.get_face(6).ok().unwrap(), vec![2, 3, 5]);
+        assert_eq!(*mesh.get_face(7).ok().unwrap(), vec![3, 0, 5]);
 
         // Check normals
         assert_eq!(mesh.get_normal(0).ok().unwrap().into_inner(), Vec3::normalize(&vector![1.,-1.,1.]));
