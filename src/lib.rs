@@ -155,10 +155,12 @@ mod tests {
 
     #[test]
     fn write_obj() {
-        assert!(PolygonMesh::load_obj("test-files/octahedron.obj")
+        let f = PolygonMesh::load_obj("test-files/octahedron.obj")
             .ok()
             .unwrap()
-            .write_obj("test-files/write-octahedron.obj")
-            .is_ok());
+            .write_obj("test-files/write-octahedron.obj");
+
+        assert!(f.is_ok());
+        assert_eq!(f.unwrap(), 115);
     }
 }
