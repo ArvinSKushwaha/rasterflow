@@ -1,8 +1,8 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader, ErrorKind};
+use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 
+use crate::{Float, Int, Point3, Uint, UnitVec3};
 use nalgebra::Unit;
-use crate::{Float, Point3, UnitVec3, Int, Uint};
 
 /// `PolygonMesh` describes the input geometries pre-discretization for simulations.
 pub struct PolygonMesh {
@@ -37,21 +37,21 @@ Returns:
 pub fn get_face_normal(polymesh: &PolygonMesh, face: &[usize]) -> Result<UnitVec3, MeshError> {
     let point_origin = match polymesh.vertices.get(face[0]) {
         None => return Err(MeshError::IndexingError("Could not load vertex.")),
-        Some(vertex) => vertex
+        Some(vertex) => vertex,
     };
 
     let first_point = match polymesh.vertices.get(face[1]) {
         None => return Err(MeshError::IndexingError("Could not load vertex.")),
-        Some(vertex) => vertex
+        Some(vertex) => vertex,
     };
 
     let second_point = match polymesh.vertices.get(face[2]) {
         None => return Err(MeshError::IndexingError("Could not load vertex.")),
-        Some(vertex) => vertex
+        Some(vertex) => vertex,
     };
 
     Ok(Unit::new_normalize(
-        (first_point - point_origin).cross(&(second_point - point_origin))
+        (first_point - point_origin).cross(&(second_point - point_origin)),
     ))
 }
 
@@ -124,23 +124,30 @@ fn process_obj_faces(polymesh: &mut PolygonMesh, face_string: &str) -> Option<Me
                 Err(_) => {
                     return Some(MeshError::FormatError("Failed to parse integer."));
                 }
-            } as usize - 1;
-            if vertex < polymesh.get_vertex_count() { face.push(vertex); } else {
+            } as usize
+                - 1;
+            if vertex < polymesh.get_vertex_count() {
+                face.push(vertex);
+            } else {
                 return Some(MeshError::IndexingError("Vertex not contained in mesh."));
             }
         } else {
-            return Some(MeshError::FormatError("Failed to retrieve\
-                                                        substring of face element."));
+            return Some(MeshError::FormatError(
+                "Failed to retrieve\
+                                                        substring of face element.",
+            ));
         }
     }
 
     if face.len() < 3 {
-        return Some(MeshError::FormatError("Face does not have enough verticies."));
+        return Some(MeshError::FormatError(
+            "Face does not have enough verticies.",
+        ));
     }
 
     match polymesh.add_face(face, None) {
         Ok(_) => {}
-        Err(e) => return Some(e)
+        Err(e) => return Some(e),
     }
 
     None
@@ -168,10 +175,14 @@ impl PolygonMesh {
         let file: File;
         match File::open(filename) {
             Ok(f) => file = f,
-            Err(e) => return match e.kind() {
-                ErrorKind::NotFound => Err(MeshError::IOError("File not found.")),
-                ErrorKind::PermissionDenied => Err(MeshError::IOError("Insufficient permissions.")),
-                _ => Err(MeshError::IOError("File failed to open.")),
+            Err(e) => {
+                return match e.kind() {
+                    ErrorKind::NotFound => Err(MeshError::IOError("File not found.")),
+                    ErrorKind::PermissionDenied => {
+                        Err(MeshError::IOError("Insufficient permissions."))
+                    }
+                    _ => Err(MeshError::IOError("File failed to open.")),
+                }
             }
         }
 
@@ -182,21 +193,25 @@ impl PolygonMesh {
 
         while match bufread.read_line(&mut buffer_string) {
             Ok(t) => t != 0,
-            Err(_) => { return Err(MeshError::IOError("Could not read next line.")); }
+            Err(_) => {
+                return Err(MeshError::IOError("Could not read next line."));
+            }
         } {
             buffer_string = buffer_string.trim().to_string();
             if buffer_string.starts_with("v ") {
-                if let Some(error) = process_obj_vertices(
-                    &mut polymesh,
-                    buffer_string.trim_start_matches("v "),
-                ) { return Err(error); }
+                if let Some(error) =
+                    process_obj_vertices(&mut polymesh, buffer_string.trim_start_matches("v "))
+                {
+                    return Err(error);
+                }
                 buffer_string = String::new();
                 continue;
             } else if buffer_string.starts_with("f ") {
-                if let Some(error) = process_obj_faces(
-                    &mut polymesh,
-                    buffer_string.trim_start_matches("f "),
-                ) { return Err(error); }
+                if let Some(error) =
+                    process_obj_faces(&mut polymesh, buffer_string.trim_start_matches("f "))
+                {
+                    return Err(error);
+                }
                 buffer_string = String::new();
                 continue;
             } else if buffer_string.starts_with('#')
@@ -209,13 +224,46 @@ impl PolygonMesh {
                 || buffer_string.starts_with("usemtl ")
                 || buffer_string.starts_with("mtllib ")
                 || buffer_string.starts_with("l ")
-                || buffer_string.is_empty() {
+                || buffer_string.is_empty()
+            {
                 buffer_string = String::new();
                 continue;
-            } else { return Err(MeshError::FormatError("Invalid file line.")); }
+            } else {
+                return Err(MeshError::FormatError("Invalid file line."));
+            }
         }
 
         Ok(Box::new(polymesh))
+    }
+
+    /**
+    Writes a `PolygonMesh` to the filename passed in.
+
+    Parameters:
+    - `filename: &str` - A string containing the filename to save them mesh to.
+
+    Returns:
+    - `Result<usize, Error>` - Returns the number of bytes written if file-writing is successful
+    otherwise returns an `std::io::Error`, given by the methods called in this method.
+     */
+    pub fn write_obj(&self, filename: &str) -> Result<usize, Error> {
+        let mut file = File::create(filename)?;
+        let mut bytes: usize = 0;
+
+        for vertex in &self.vertices {
+            let string = format!("v {} {} {}", vertex.x, vertex.y, vertex.z);
+            writeln!(file, "{}", string)?;
+            bytes += string.len() + 1;
+        }
+
+        for face in &self.faces {
+            let string: Vec<String> = face.iter().map(|f| (f + 1).to_string()).collect();
+            let string = format!("f {}", string.join(" "));
+            writeln!(file, "{}", string)?;
+            bytes += string.len() + 1;
+        }
+
+        Ok(bytes)
     }
 
     /**
@@ -225,7 +273,9 @@ impl PolygonMesh {
     - `usize` - The number of the vertices.
      */
     #[inline(always)]
-    pub fn get_vertex_count(&self) -> usize { self.vertices.len() }
+    pub fn get_vertex_count(&self) -> usize {
+        self.vertices.len()
+    }
 
     /**
     Retrieves the number of faces (and face normals) in the mesh.
@@ -234,7 +284,9 @@ impl PolygonMesh {
     - `usize` - The number of faces (and face normals).
      */
     #[inline(always)]
-    pub fn get_face_count(&self) -> usize { self.faces.len() }
+    pub fn get_face_count(&self) -> usize {
+        self.faces.len()
+    }
 
     /**
     Gets a vertex at a given index.
@@ -247,7 +299,9 @@ impl PolygonMesh {
     `MeshError::IndexingError`.
      */
     pub fn get_vertex(&self, idx: usize) -> Result<&Point3, MeshError> {
-        self.vertices.get(idx).ok_or(MeshError::IndexingError("Indexing failed."))
+        self.vertices
+            .get(idx)
+            .ok_or(MeshError::IndexingError("Indexing failed."))
     }
 
     /**
@@ -261,7 +315,9 @@ impl PolygonMesh {
     `MeshError::IndexingError`.
      */
     pub fn get_face(&self, idx: usize) -> Result<&Vec<usize>, MeshError> {
-        self.faces.get(idx).ok_or(MeshError::IndexingError("Indexing failed."))
+        self.faces
+            .get(idx)
+            .ok_or(MeshError::IndexingError("Indexing failed."))
     }
 
     /**
@@ -275,7 +331,9 @@ impl PolygonMesh {
     `MeshError::IndexingError`.
      */
     pub fn get_normal(&self, idx: usize) -> Result<&UnitVec3, MeshError> {
-        self.face_normals.get(idx).ok_or(MeshError::IndexingError("Indexing failed."))
+        self.face_normals
+            .get(idx)
+            .ok_or(MeshError::IndexingError("Indexing failed."))
     }
 
     /// Adds `vertex: Point3` to the mesh and returns the index where the vertex will reside.
@@ -303,10 +361,12 @@ impl PolygonMesh {
         face: Vec<usize>,
         face_normal: Option<UnitVec3>,
     ) -> Result<usize, MeshError> {
-        if let Some(normal) = face_normal { self.face_normals.push(normal); } else {
+        if let Some(normal) = face_normal {
+            self.face_normals.push(normal);
+        } else {
             self.face_normals.push(match get_face_normal(self, &face) {
                 Ok(t) => t,
-                Err(e) => return Err(e)
+                Err(e) => return Err(e),
             });
         }
 
