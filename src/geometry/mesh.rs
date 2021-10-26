@@ -3,6 +3,7 @@ use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 
 use crate::{Float, Int, Point3, Uint, UnitVec3};
 use nalgebra::Unit;
+use regex::Regex;
 
 /// `PolygonMesh` describes the input geometries pre-discretization for simulations.
 pub struct PolygonMesh {
@@ -214,16 +215,9 @@ impl PolygonMesh {
                 }
                 buffer_string = String::new();
                 continue;
-            } else if buffer_string.starts_with('#')
-                || buffer_string.starts_with("vt ")
-                || buffer_string.starts_with("vn ")
-                || buffer_string.starts_with("vp ")
-                || buffer_string.starts_with("g ")
-                || buffer_string.starts_with("o ")
-                || buffer_string.starts_with("s ")
-                || buffer_string.starts_with("usemtl ")
-                || buffer_string.starts_with("mtllib ")
-                || buffer_string.starts_with("l ")
+            } else if Regex::new("^(\\#|v(t|n|p)|g|o|s|usemtl|mtllib|l)")
+                .unwrap()
+                .is_match(buffer_string.as_str())
                 || buffer_string.is_empty()
             {
                 buffer_string = String::new();

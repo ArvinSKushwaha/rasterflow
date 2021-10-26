@@ -94,6 +94,8 @@ mod tests {
             mesh.get_normal(7).ok().unwrap().into_inner(),
             Vec3::normalize(&vector![1., 1., -1.])
         );
+
+        assert!(PolygonMesh::load_obj("test-files/trumpet.obj").is_ok());
     }
 
     /// Test Invalid OBJ files and ensure errors are as expected.
