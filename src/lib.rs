@@ -11,9 +11,10 @@ type Point3 = nalgebra::Point3<Float>;
 
 #[cfg(test)]
 mod tests {
-    use crate::geometry::mesh::*;
+    use crate::geometry::polymesh::*;
     use crate::Vec3;
     use nalgebra::{vector, Point3};
+    use crate::geometry::polymesh::MeshError;
 
     /// Test Valid OBJ files to ensure expected result is retrieved.
     #[test]
