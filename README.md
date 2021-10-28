@@ -6,3 +6,10 @@
 
 
 High-Performance fluid simulation and visualization.
+
+### Progress:
+
+- [x] Implement PolygonMesh object to handle mesh input for fluids.
+- [x] Implement OBJ processing to load PolygonMeshes from .OBJ files
+- [x] Use abstraction to generalize PolygonMesh and implement TriangleMesh
+- [ ] Implement Discretizer trait
