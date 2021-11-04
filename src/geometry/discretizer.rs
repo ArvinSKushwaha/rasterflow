@@ -1,16 +1,14 @@
-use crate::geometry::discmesh::CellMesh;
+use crate::geometry::discmesh::{Cell, CellMesh, TetrahedralMesh, Tetrahedron};
 use crate::geometry::polymesh::{PolyMesh, TriangleMesh};
 
-pub trait Discretizer<T: PolyMesh> {
-    fn discretize(polymesh: &T) -> CellMesh;
+pub trait Discretizer<T: PolyMesh, U: Cell, V: CellMesh<U>> {
+    fn discretize(polymesh: &T) -> V;
 }
 
-pub struct TetrahedralDiscretizer {
+pub struct TetrahedralDiscretizer {}
 
-}
-
-impl Discretizer<TriangleMesh> for TetrahedralDiscretizer {
-    fn discretize(polymesh: &TriangleMesh) -> CellMesh {
+impl Discretizer<TriangleMesh, Tetrahedron, TetrahedralMesh> for TetrahedralDiscretizer {
+    fn discretize(polymesh: &TriangleMesh) -> TetrahedralMesh {
         todo!()
     }
 }

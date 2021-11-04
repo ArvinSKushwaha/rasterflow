@@ -7,10 +7,10 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind, Write};
 use std::ops::{Index, RangeFull};
 
-use crate::{Float, Int, Point3, Uint, UnitVec3, Vec3};
 use nalgebra::{vector, Unit};
-
 use regex::Regex;
+
+use crate::{Float, Int, Point3, Uint, UnitVec3, Vec3};
 
 pub trait PolyMesh {
     type FaceType: Index<RangeFull, Output = [usize]>;

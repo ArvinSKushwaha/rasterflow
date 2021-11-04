@@ -1,6 +1,6 @@
-pub mod geometry;
-
 use nalgebra::{Unit, Vector3};
+
+pub mod geometry;
 
 type Float = f32;
 type Int = i32;
@@ -11,10 +11,11 @@ type Point3 = nalgebra::Point3<Float>;
 
 #[cfg(test)]
 mod tests {
+    use nalgebra::{vector, Point3};
+
+    use crate::geometry::polymesh::MeshError;
     use crate::geometry::polymesh::*;
     use crate::Vec3;
-    use nalgebra::{vector, Point3};
-    use crate::geometry::polymesh::MeshError;
 
     /// Test Valid OBJ files to ensure expected result is retrieved.
     #[test]
