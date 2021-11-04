@@ -5,7 +5,7 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ArvinSKushwaha/rasterflow?style=for-the-badge)
 
 
-High-Performance fluid simulation and visualization.
+High-Performance fluid simulation and visualization. This project mostly exists to become more familiar with Rust, and to build a project that could one day become applicable to my interests in Computational Fluid Dynamics.
 
 ### Progress:
 
