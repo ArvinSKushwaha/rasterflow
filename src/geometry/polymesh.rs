@@ -274,8 +274,7 @@ fn process_obj_faces(polymesh: &mut PolygonMesh, face_string: &str) -> Option<Me
                 Err(_) => {
                     return Some(MeshError::FormatError("Failed to parse integer."));
                 }
-            } as usize
-                - 1;
+            } - 1;
             if vertex < polymesh.get_vertex_count() {
                 face.push(vertex);
             } else {

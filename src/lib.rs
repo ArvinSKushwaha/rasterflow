@@ -4,7 +4,7 @@ pub mod geometry;
 
 type Float = f32;
 type Int = i32;
-type Uint = u32;
+type Uint = usize;
 type Vec3 = Vector3<Float>;
 type UnitVec3 = Unit<Vec3>;
 type Point3 = nalgebra::Point3<Float>;
